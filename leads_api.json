@@ -1,0 +1,86 @@
+{
+  "name": "Projeto 2: Leads Intelligence API (Visual)",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "triagem-leads",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        512,
+        80
+      ],
+      "id": "e00bbc47-3625-4ee4-bd96-640f659560f8",
+      "name": "Webhook (Entrada)",
+      "webhookId": "f3c2ed77-2074-4d49-b5c9-8458a25ec8b9"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Pegamos os dados da Query String\nconst query = items[0].json.query || {};\n\nconst nome = query.nome || \"Visitante\";\nconst email = (query.email || \"exemplo@teste.com\").toLowerCase();\nconst empresa = query.empresa || \"Empresa não informada\";\n\nlet prioridade = \"Baixa\";\nlet cor = \"#2ecc71\"; // Verde\nlet tempoResposta = \"24 horas\";\nlet categoria = \"Lead Comum\";\n\nconst dominiosPessoais = [\"gmail.com\", \"hotmail.com\", \"outlook.com\", \"yahoo.com\"];\nconst dominio = email.split('@')[1] || \"\";\n\nif (dominio && !dominiosPessoais.includes(dominio)) {\n  prioridade = \"Alta\";\n  cor = \"#e67e22\"; // Laranja\n  tempoResposta = \"15 minutos\";\n  categoria = \"Lead Corporativo (B2B)\";\n}\n\nif (dominio === \"n8n.io\") {\n  prioridade = \"Crítica\";\n  cor = \"#e74c3c\"; // Vermelho\n  tempoResposta = \"Imediato\";\n  categoria = \"Parceiro VIP\";\n}\n\nreturn {\n  nome,\n  email,\n  empresa,\n  prioridade,\n  cor,\n  tempoResposta,\n  categoria\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        736,
+        80
+      ],
+      "id": "e73dac38-cf32-478d-824c-69a53c6ffd02",
+      "name": "Lógica de Triagem (JS)"
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "={{ \n`<!DOCTYPE html>\n<html lang=\"pt-br\">\n<head>\n    <meta charset=\"UTF-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <title>Resultado da Triagem</title>\n    <style>\n        body { font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background: #f0f2f5; }\n        .card { background: white; padding: 2rem; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 350px; text-align: center; }\n        .badge { display: inline-block; padding: 5px 15px; border-radius: 20px; color: white; font-weight: bold; margin-bottom: 1rem; background: ${$json.cor}; }\n        h2 { margin: 0; color: #333; }\n        p { color: #666; margin: 5px 0; }\n        .info-box { background: #f8f9fa; padding: 15px; border-radius: 10px; margin-top: 15px; text-align: left; }\n        .label { font-size: 0.8rem; color: #999; text-transform: uppercase; }\n        .value { font-weight: bold; color: #444; }\n    </style>\n</head>\n<body>\n    <div class=\"card\">\n        <div class=\"badge\">${$json.prioridade}</div>\n        <h2>${$json.nome}</h2>\n        <p>${$json.empresa}</p>\n        \n        <div class=\"info-box\">\n            <div><span class=\"label\">Categoria:</span> <span class=\"value\">${$json.categoria}</span></div>\n            <div><span class=\"label\">Tempo de Resposta:</span> <span class=\"value\">${$json.tempoResposta}</span></div>\n        </div>\n        \n        <p style=\"font-size: 0.7rem; margin-top: 20px; color: #bbb;\">Processado via n8n Engine</p>\n    </div>\n</body>\n</html>` \n}}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        960,
+        80
+      ],
+      "id": "5ade64a2-f323-4d0e-b279-5c6b2e60c788",
+      "name": "Responder com HTML"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook (Entrada)": {
+      "main": [
+        [
+          {
+            "node": "Lógica de Triagem (JS)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Lógica de Triagem (JS)": {
+      "main": [
+        [
+          {
+            "node": "Responder com HTML",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "a913f67a-53b4-43d3-8397-74da2976fd5b",
+  "meta": {
+    "instanceId": "8804684ed9f9cddd305693eb161b7d084b3b49437075bc1c3ac5931e8c681022"
+  },
+  "id": "zZfAEZTrUYhbG1TqWD5I6",
+  "tags": []
+}
